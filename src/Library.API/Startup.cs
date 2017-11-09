@@ -42,6 +42,8 @@ namespace Library.API
                 setupAction.ReturnHttpNotAcceptable = true;
                 //print out XML output
                 setupAction.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter());
+                //input XML to body
+                setupAction.InputFormatters.Add(new XmlDataContractSerializerInputFormatter());
             });
 
             // register the DbContext on the container, getting the connection string from
@@ -84,6 +86,8 @@ namespace Library.API
                         src.DateOfBirth.GetCurrentAge()));
 
                 cfg.CreateMap<Book, BookDto>();
+                cfg.CreateMap<AuthorForCreationDto, Author>();
+                cfg.CreateMap<BookForCreationDto, Book>();
             });
 
             libraryContext.EnsureSeedDataForContext();
