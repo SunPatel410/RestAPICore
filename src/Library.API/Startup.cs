@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +13,7 @@ using Library.API.Services;
 using Library.API.Entities;
 using Library.API.Helpers;
 using Library.API.Models;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 
@@ -61,6 +63,7 @@ namespace Library.API
             ILoggerFactory loggerFactory, LibraryContext libraryContext)
         {
             loggerFactory.AddConsole();
+            loggerFactory.AddDebug(LogLevel.Information);
 
             if (env.IsDevelopment())
             {
@@ -72,6 +75,16 @@ namespace Library.API
                 app.UseExceptionHandler(appBuilder =>
                 appBuilder.Run(async context =>
                 {
+                    var exceptionHandlerFeature = context.Features.Get<IExceptionHandlerFeature>();
+
+                    if (exceptionHandlerFeature != null)
+                    {
+                        var logger = loggerFactory.CreateLogger("Global exception logger");
+                        logger.LogError(500, exceptionHandlerFeature.Error, 
+                            exceptionHandlerFeature.Error.Message);
+                    }
+
+
                     context.Response.StatusCode = 500;
                     await context.Response.WriteAsync("An unexpected fault happened. Try again later");
                 }));
