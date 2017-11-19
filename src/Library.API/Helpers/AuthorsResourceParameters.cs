@@ -10,6 +10,7 @@ namespace Library.API.Helpers
     {
         public const int maxPageSize = 20;
 
+        //Paging
         public int PageNumber { get; set; } = 1;
         public int _pageSize = 10;
 
@@ -19,7 +20,17 @@ namespace Library.API.Helpers
             set { _pageSize = (value > maxPageSize) ? maxPageSize : value; }
         }
 
+        //Filering
         public string Genre { get; set; }
+
+        //Searching
         public string SearchQuery { get; set; }
+        
+        //Sorting 
+        public string OrderBy { get; set; } = "Name";
+
+        //Shaping Resource
+        public string Fields { get; set; }
+
     }
 }
