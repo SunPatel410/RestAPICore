@@ -8,9 +8,10 @@ using Library.API.Infrastructure;
 namespace Library.API.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    partial class LibraryContextModelSnapshot : ModelSnapshot
+    [Migration("20171121221317_AddDateOfDeathToAuthor")]
+    partial class AddDateOfDeathToAuthor
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.3")
