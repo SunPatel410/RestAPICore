@@ -1,12 +1,12 @@
-﻿using Library.API.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Library.API.Entities;
 using Library.API.Helpers;
 using Library.API.Models;
-using Microsoft.EntityFrameworkCore.Migrations.Operations;
+using Library.API.Services;
 
-namespace Library.API.Services
+namespace Library.API.Infrastructure.Repositories
 {
     public class LibraryRepository : ILibraryRepository
     {

@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Library.API.Migrations
+namespace Library.API.Infrastructure.Migrations
 {
     public partial class InitialMigration : Migration
     {

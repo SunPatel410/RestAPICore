@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Library.API.Entities;
 
-namespace Library.API.Entities
+namespace Library.API.Infrastructure
 {
     public static class LibraryContextExtensions
     {

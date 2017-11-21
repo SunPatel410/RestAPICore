@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Library.API.Entities;
 using Library.API.Helpers;
+using Library.API.Infrastructure.Repositories;
 using Library.API.Models;
 using Library.API.Services;
 using Microsoft.AspNetCore.Mvc;

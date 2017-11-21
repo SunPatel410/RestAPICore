@@ -2,16 +2,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Library.API.Entities;
 
-namespace Library.API.Migrations
+namespace Library.API.Infrastructure.Migrations
 {
     [DbContext(typeof(LibraryContext))]
-    [Migration("20161007150914_InitialMigration")]
-    partial class InitialMigration
+    partial class LibraryContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.0.1")
