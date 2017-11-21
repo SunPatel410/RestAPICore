@@ -48,15 +48,15 @@ namespace Library.API.Controllers
 
             var authorsFromRepo = _libraryRepository.GetAuthors(authorsResourceParameters);
 
-            //previous page
-            var previousPageLink = authorsFromRepo.HasPrevious ? 
-                CreateAuthorsResourceUri(authorsResourceParameters,
-                    ResourceUriType.PreviousPage) : null;
+            ////previous page
+            //var previousPageLink = authorsFromRepo.HasPrevious ? 
+            //    CreateAuthorsResourceUri(authorsResourceParameters,
+            //        ResourceUriType.PreviousPage) : null;
 
-            //next page
-            var nextPageLink = authorsFromRepo.HasNext ?
-                CreateAuthorsResourceUri(authorsResourceParameters,
-                    ResourceUriType.NextPage) : null;
+            ////next page
+            //var nextPageLink = authorsFromRepo.HasNext ?
+            //    CreateAuthorsResourceUri(authorsResourceParameters,
+            //        ResourceUriType.NextPage) : null;
 
             //Adding metadata for paging
             var paginationMetadata = new
@@ -64,19 +64,45 @@ namespace Library.API.Controllers
                 totalCount = authorsFromRepo.TotalCount,
                 pageSize = authorsFromRepo.PageSize,
                 currentPage = authorsFromRepo.CurrentPage,
-                totalPages = authorsFromRepo.TotalPages,
-                previousPageLink = previousPageLink,
-                nextPageLink = nextPageLink
+                totalPages = authorsFromRepo.TotalPages
+                //previousPageLink = previousPageLink,
+                //nextPageLink = nextPageLink
             };
 
             Response.Headers.Add("X-Pagination", Newtonsoft.Json.JsonConvert.SerializeObject(paginationMetadata));
 
             var authors = Mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo);
 
-            return Ok(authors.ShapeData(authorsResourceParameters.Fields));            
+            //links for the author
+            var links = CreateLinksForAuthors(authorsResourceParameters,
+                authorsFromRepo.HasNext, authorsFromRepo.HasPrevious);
+
+            // links for the shapedata of the authors
+            var shapedAuthors = authors.ShapeData(authorsResourceParameters.Fields);
+
+            var shapedAuthorsLinks = shapedAuthors.Select(author =>
+            {
+                var authorAsDictionary = author as IDictionary<string, object>;
+
+                var authorLinks = CreateLinksForAuthor(
+                    (Guid) authorAsDictionary["Id"],
+                    authorsResourceParameters.Fields);
+
+                //shaped authors thier own set of links
+                authorAsDictionary.Add("links", authorLinks);
+
+                return authorAsDictionary;
+            });
+
+            var linkedCollectionResource = new
+            {
+                value = shapedAuthorsLinks,
+                links = links
+            };
+
+            return Ok(linkedCollectionResource);            
         }
-
-
+        
         private string CreateAuthorsResourceUri(AuthorsResourceParameters authorsResourceParameters,
             ResourceUriType type)
         {
@@ -105,7 +131,7 @@ namespace Library.API.Controllers
                             pageNumber = authorsResourceParameters.PageNumber + 1,
                             pageSize = authorsResourceParameters.PageSize
                         });
-
+                case ResourceUriType.CurrentPage:
                 default:
                     return _urlHelper.Link("GetAuthors",
                         new
@@ -139,7 +165,16 @@ namespace Library.API.Controllers
 
             var author = Mapper.Map<AuthorDto>(authorFromRepo);
 
-            return Ok(author.ShapeData(fields));
+            var links = CreateLinksForAuthor(id, fields);
+
+            //convert expando object to a dictonary
+            var linkedResourceToReturn = author.ShapeData(fields) 
+                as IDictionary<string, object>;
+
+            //add a new key/value pair
+            linkedResourceToReturn.Add("links", links);
+
+            return Ok(linkedResourceToReturn);
         }
         /// <summary>
         /// Creating a resource
@@ -166,7 +201,15 @@ namespace Library.API.Controllers
 
             var authorToReturn = Mapper.Map<AuthorDto>(authorEntity);
 
-            return CreatedAtRoute("GetAuthor", new { id = authorToReturn.Id}, authorToReturn);
+            //pass in fields null becuase its a post method.
+            var links = CreateLinksForAuthor(authorToReturn.Id, null);
+
+            var linkedResourceToReturn = authorToReturn.ShapeData(null) 
+                as IDictionary<string, object>;
+
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute("GetAuthor", new { id = linkedResourceToReturn["Id"] }, linkedResourceToReturn);
         }
 
         /// <summary>
@@ -185,7 +228,7 @@ namespace Library.API.Controllers
             return NotFound();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteAuthor")]
         public IActionResult DeleteAuthor(Guid id)
         {
             var authorFromRepo = _libraryRepository.GetAuthor(id);
@@ -204,5 +247,67 @@ namespace Library.API.Controllers
             return NoContent();
         }
 
+        private IEnumerable<LinkDto> CreateLinksForAuthor(Guid id, string fields)
+        {
+            var links = new List<LinkDto>();
+
+            if (string.IsNullOrEmpty(fields))
+            {
+                links.Add(
+                    new LinkDto(_urlHelper.Link("GetAuthor",
+                        new {id = id}), "self", "GET"));
+            }
+            else
+            {
+                links.Add(
+                    new LinkDto(_urlHelper.Link("GetAuthor",
+                        new { id = id, fields = fields }), "self", "GET"));
+            }
+
+            links.Add(
+                new LinkDto(_urlHelper.Link("DeleteAuthor",
+                    new { id = id}), "delete_author", "DELETE"));
+
+            links.Add(
+                new LinkDto(_urlHelper.Link("CreateBookForAuthor",
+                    new { authorId = id }), "create_book_for_author", "POST"));
+
+            links.Add(
+                new LinkDto(_urlHelper.Link("GetBookForAuthor",
+                    new { authorId = id }), "books", "GET"));
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForAuthors(
+            AuthorsResourceParameters authorsResourceParameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto>
+            {
+                // self 
+                new LinkDto(CreateAuthorsResourceUri(authorsResourceParameters,
+                        ResourceUriType.CurrentPage)
+                    , "self", "GET")
+            };
+
+            if (hasNext)
+            {
+                links.Add(
+                    new LinkDto(CreateAuthorsResourceUri(authorsResourceParameters,
+                            ResourceUriType.NextPage),
+                        "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add(
+                    new LinkDto(CreateAuthorsResourceUri(authorsResourceParameters,
+                            ResourceUriType.PreviousPage),
+                        "previousPage", "GET"));
+            }
+
+            return links;
+        }
     }
 }
