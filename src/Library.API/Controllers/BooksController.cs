@@ -285,7 +285,7 @@ namespace Library.API.Controllers
         }
 
         /// <summary>
-        /// HATEOAS Dynamiclly typed way.
+        /// HATEOAS wrapper - Use for single resources for this method
         /// </summary>
         /// <param name="book"></param>
         /// <returns></returns>
@@ -318,7 +318,7 @@ namespace Library.API.Controllers
         }
 
         /// <summary>
-        /// using wrapper to generate links. Part of HATEOAS
+        /// using wrapper approch to generate collection links. Part of HATEOAS
         /// </summary>
         /// <param name="booksWrapper"></param>
         /// <returns></returns>

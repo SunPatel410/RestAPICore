@@ -308,6 +308,7 @@ namespace Library.API.Controllers
             return NoContent();
         }
 
+        //HATEOAS => Dynamic Approch for single resources
         private IEnumerable<LinkDto> CreateLinksForAuthor(Guid id, string fields)
         {
             var links = new List<LinkDto>();
@@ -340,6 +341,7 @@ namespace Library.API.Controllers
             return links;
         }
 
+        //HATEOAS => Dynamic collection approch
         private IEnumerable<LinkDto> CreateLinksForAuthors(
             AuthorsResourceParameters authorsResourceParameters,
             bool hasNext, bool hasPrevious)
